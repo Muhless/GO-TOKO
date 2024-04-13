@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -29,16 +30,27 @@ type DBConfig struct {
 	DBPassword string
 	DBName     string
 	DBPort     string
+	DBDriver   string
 }
 
 func (server *Server) Initialize(appConfig AppConfig, dbConfig DBConfig) {
 	fmt.Println("Welcome to " + appConfig.AppName)
 
 	var err error
-	dsn := fmt.Sprintf("host=%s	user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
-		dbConfig.DBHost, dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBPort)
 
-	server.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if dbConfig.DBDriver == "mysql" {
+		// koneksi ke mysql
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+			dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBHost, dbConfig.DBPort, dbConfig.DBName)
+			
+			server.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	} else {
+		// koneksi ke postgresql
+		dsn := fmt.Sprintf("host=%s	user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
+			dbConfig.DBHost, dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBPort)
+
+		server.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	}
 
 	if err != nil {
 		panic("Failed connecting to database")
@@ -81,8 +93,9 @@ func Run() {
 	dbConfig.DBPassword = getEnv("DB_PASSWORD", "admin")
 	dbConfig.DBName = getEnv("DB_NAME", "db_gotoko")
 	dbConfig.DBPort = getEnv("DB_PORT", "5432")
+	dbConfig.DBDriver = getEnv("DB_DRIVER", "postgres")
 
 	// server
 	server.Initialize(appConfig, dbConfig)
-	server.Run(":" + appConfig.AppPort)
+	server.Run(": " + appConfig.AppPort)
 }
