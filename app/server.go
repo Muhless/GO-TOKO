@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -22,8 +23,26 @@ type AppConfig struct {
 	AppPort string
 }
 
-func (server *Server) Initialize(appConfig AppConfig) {
+type DBConfig struct {
+	DBHost     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBPort     string
+}
+
+func (server *Server) Initialize(appConfig AppConfig, dbConfig DBConfig) {
 	fmt.Println("Welcome to " + appConfig.AppName)
+
+	var err error
+	dsn := fmt.Sprintf("host=%s	user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
+		dbConfig.DBHost, dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBPort)
+
+	server.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		panic("Failed connecting to database")
+	}
 
 	server.Router = mux.NewRouter()
 	server.initializeRoutes()
@@ -44,16 +63,26 @@ func getEnv(key, fallback string) string {
 func Run() {
 	var server = Server{}
 	var appConfig = AppConfig{}
+	var dbConfig = DBConfig{}
 
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error on loading .env.example file")
 	}
 
+	// port
 	appConfig.AppName = getEnv("APP_NAME", "GoTokoApp")
 	appConfig.AppEnv = getEnv("APP_ENV", "Developments")
 	appConfig.AppPort = getEnv("APP_PORT", " 9000")
 
-	server.Initialize(appConfig)
+	// database
+	dbConfig.DBHost = getEnv("DB_HOST", "localhost")
+	dbConfig.DBUser = getEnv("DB_USER", "postgres")
+	dbConfig.DBPassword = getEnv("DB_PASSWORD", "admin")
+	dbConfig.DBName = getEnv("DB_NAME", "db_gotoko")
+	dbConfig.DBPort = getEnv("DB_PORT", "5432")
+
+	// server
+	server.Initialize(appConfig, dbConfig)
 	server.Run(":" + appConfig.AppPort)
 }
