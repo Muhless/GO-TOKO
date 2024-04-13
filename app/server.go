@@ -36,14 +36,19 @@ type DBConfig struct {
 func (server *Server) Initialize(appConfig AppConfig, dbConfig DBConfig) {
 	fmt.Println("Welcome to " + appConfig.AppName)
 
+	server.InitializeDB(dbConfig)
+	server.initializeRoutes()
+}
+
+func (server *Server) InitializeDB(dbConfig DBConfig) {
 	var err error
 
 	if dbConfig.DBDriver == "mysql" {
 		// koneksi ke mysql
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 			dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBHost, dbConfig.DBPort, dbConfig.DBName)
-			
-			server.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+		server.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	} else {
 		// koneksi ke postgresql
 		dsn := fmt.Sprintf("host=%s	user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
@@ -56,8 +61,14 @@ func (server *Server) Initialize(appConfig AppConfig, dbConfig DBConfig) {
 		panic("Failed connecting to database")
 	}
 
-	server.Router = mux.NewRouter()
-	server.initializeRoutes()
+	for _, model := range RegisterModel(){
+		err = server.DB.Debug().AutoMigrate(model.Model)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	fmt.Println("Database migrated successfully!")
 }
 
 func (server *Server) Run(addr string) {
