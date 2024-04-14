@@ -10,7 +10,9 @@ type Product struct {
 	ID               string `gorm:"size:36;not null;uniqueIndex;primary_key"`
 	ParentID         string `gorm:"size:36;index"`
 	User             User
-	UserID           string          `gorm:"size:36;index"`
+	UserID           string `gorm:"size:36;index"`
+	ProductImages    []ProductImage
+	Categories       []Category      `gorm:"many2many:product_categories;"`
 	Sku              string          `gorm:"size:100;index"`
 	Name             string          `gorm:"size:255"`
 	Slug             string          `gorm:"size:255"`
@@ -23,5 +25,4 @@ type Product struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	DeletedAt        gorm.DeletedAt
-	ProductImages    []ProductImage
 }
