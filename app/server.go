@@ -82,7 +82,7 @@ func (server *Server) Run(addr string) {
 }
 
 // fungsi migrate dan seeder
-func (server *Server) initCommands(config AppConfig, dbConfig DBConfig) {
+func (server *Server) initCommands( _ AppConfig, dbConfig DBConfig) {
 	server.InitializeDB(dbConfig)
 
 	cmdApp := cli.NewApp()
