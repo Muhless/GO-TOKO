@@ -27,9 +27,11 @@ func Run() {
 	}
 
 	// port
+	// todo : parameter 1=env, parameter 2=defaultnya
 	appConfig.AppName = getEnv("APP_NAME", "GoTokoApp")
 	appConfig.AppEnv = getEnv("APP_ENV", "Developments")
 	appConfig.AppPort = getEnv("APP_PORT", "9000")
+	appConfig.AppUrl = getEnv("APP_URL", "http://localhost:9000")
 
 	// database
 	dbConfig.DBHost = getEnv("DB_HOST", "localhost")
