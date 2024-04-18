@@ -41,7 +41,7 @@ func (p *Product) GetProducts(db *gorm.DB, perPage int, page int) (*[]Product, i
 	offSet := (page - 1) * perPage
 
 	// query menampilkan data produk
-	err = db.Debug().Model(&Product{}).Order("Created_at desc").Limit(perPage).Offset(int(offSet)).Find(&products).Error
+	err = db.Debug().Model(&Product{}).Order("Created_at desc").Limit(perPage).Offset(offSet).Find(&products).Error
 	if err != nil {
 		return nil, 0, err
 	}

@@ -10,9 +10,9 @@
       </li>
       {{ range $i, $link := .pagination.Links }}
       {{ $active := "" }}
-      {{ if $link.IsCurrentPage }}
+        {{ if $link.IsCurrentPage }}
             {{ $active = "active" }}
-      {{ end }}
+        {{ end }}
         <li class="page-item {{ $active }}"><a class="page-link" href="{{ $link.Url }}">{{ $link.Page }}</a></li>
       {{ end }}
       <li class="page-item">

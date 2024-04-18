@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 
@@ -91,7 +92,6 @@ func (server *Server) initializeDB(dbConfig DBConfig) {
 
 func (server *Server) initializeAppConfig(appConfig AppConfig)  {
 	server.AppConfig = &appConfig
-	
 }
 
 func (server *Server) dbMigrate() {
@@ -145,7 +145,7 @@ func (server *Server) Run(addr string) {
 func GetPaginationLinks(config *AppConfig, params PaginationParams) (PaginationLinks, error) {
 	var links []pageLink
 
-	totalPages := int32(float64(params.TotalRows) / float64(params.PerPage))
+	totalPages := int32(math.Ceil(float64(params.TotalRows) / float64(params.PerPage)))
 
 	for i := 1; int32(i) <= totalPages; i++ {
 		links = append(links, pageLink{
