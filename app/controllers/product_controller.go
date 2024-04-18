@@ -63,7 +63,6 @@ func (server *Server) GetProductBySlug (w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-
 // melempar kender ke view
 	_ = render.HTML(w, http.StatusOK, "product", map[string]interface{}{
 		"product": product,
